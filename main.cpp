@@ -45,6 +45,22 @@ int main() {
 	example.insert("dogggies");
 	cout << example.prettyPrint() << endl;
 
+	example.erase("a");
+	example.erase("b");
+	example.erase("blah");
+	example.erase("d");
+	example.erase("AA");
+
+	cout << example.prettyPrint() << endl;
+
+	// string arr[] = {"a", "b"};
+	// JumpList example3(2, arr);
+	// cout << example3.prettyPrint() << endl;
+
+	// example3.erase("a");
+
+	// cout << example3.prettyPrint() << endl;
+
 	// cout << "erase from running example:" << endl;
 	// JumpList example(10);
 	// cout << example.print() << endl;

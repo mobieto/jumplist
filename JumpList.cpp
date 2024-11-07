@@ -69,7 +69,7 @@ JumpList::JumpList(int size, const string* arr) {
 JumpList::~JumpList() {
 	Node* current = head_;
 
-	while (current->next_ != nullptr) {
+	while (current != nullptr) { // delete every node from memory
 		Node* next = current->next_;
 		delete current;
 		current = next;
@@ -85,7 +85,7 @@ int JumpList::size() const {
 
 	Node* current = head_;
 
-	while (current != nullptr) {
+	while (current != nullptr) { // loop through each node and increase size by 1
 		size++;
 		current = current->next_;
 	}
@@ -116,16 +116,16 @@ bool JumpList::find(const string& s) const {
 }
 
 string JumpList::get(int i) const {
-	if (i < 0 || i >= this->size()) return "";
+	if (i < 0 || i >= this->size()) return ""; // out of bounds
 
 	int step = 0;
 	Node* current = head_;
 
 	while (step < i) {
-		if (current->jump_ != nullptr && step + current->gap_ - 1 < i) {
+		if (current->jump_ != nullptr && step + current->gap_ - 1 < i) { // move through fast line
 			step += current->gap_;
 			current = current->jump_;
-		} else {
+		} else { // slow lane
 			step += 1;
 			current = current->next_;
 		}
@@ -164,7 +164,7 @@ string JumpList::print() const {
 	string out = "";
 	Node* current = head_;
 
-	while (current != nullptr) {
+	while (current != nullptr) { // data_ of every node
 		out.append(current->data_ + (current->next_ != nullptr ? " " : ""));
 		current = current->next_;
 	}
@@ -172,7 +172,7 @@ string JumpList::print() const {
 	out.append("\n");
 	current = head_;
 
-	while (current != nullptr) {
+	while (current != nullptr) { // data_ of every jump node
 		out.append(current->data_ + (current->jump_ != nullptr ? " " : ""));
 		current = current->jump_;
 	}
@@ -180,7 +180,7 @@ string JumpList::print() const {
 	out.append("\n");
 	current = head_;
 	
-	while (current != nullptr) {
+	while (current != nullptr) { // gap_ of every jump node
 		out.append(std::to_string(current->gap_) + (current->jump_ != nullptr ? " " : ""));
 		current = current->jump_;
 	}
@@ -193,70 +193,69 @@ string JumpList::prettyPrint() const {
 	string out_l2 = "";
 	string out_l3 = "";
 	Node* current = head_;
-	std::vector<std::pair<int, Node*>> nodePositions;
+	std::vector<std::pair<int, Node*>> nodePositions; // store position of character in text of jump nodes
 
-	while (current != nullptr) {
+	while (current != nullptr) { // line 1, data_ of every node
 		if (current->gap_ != 0) nodePositions.push_back({out_l1.length(), current});
 
 		out_l1.append(current->data_ + (current->next_ != nullptr ? " --> " : ""));
 		current = current->next_;
 	}
 
-	for (int i = 0; i < nodePositions.size(); i++) {
-		out_l2.append(
+	for (int i = 0; i < nodePositions.size(); i++) { // line 2, data_ of every jump node
+		out_l2.append( // calculate difference from beginning of this jump node's characters to next, and place that many '-' excluding 4 for ' ', '> ' and 0 index
 			nodePositions[i].second->data_ + ((nodePositions[i].second->jump_ != nullptr) ? (" " +
 			std::string(nodePositions[i + 1].first - nodePositions[i].first - 4 - (nodePositions[i].second->data_.length() - 1), '-') +
 			"> ") : "")
 		);
 	}
 
-	for (int i = 0; i < nodePositions.size(); i++) {
-		out_l3.append(
+	for (int i = 0; i < nodePositions.size(); i++) { // line 3, gap_ of every jump node
+		out_l3.append( // same as line 2 but place ' ', and only excluding 0 index
 			std::to_string(nodePositions[i].second->gap_) + ((nodePositions[i].second->jump_ != nullptr) ?
 			std::string(nodePositions[i + 1].first - nodePositions[i].first - 1, ' ') : "")
 		);
 	}
 
-	return (out_l1 + "\n" + out_l2 + "\n" + out_l3);
+	return (out_l1 + "\n" + out_l2 + "\n" + out_l3); // join lines with newline
 }
 
 bool JumpList::insert(const string& s) {
 	Node* newNode = new Node(s, nullptr, nullptr, 0);
-	Node* affectedJumpNode = this->head_;
+	Node* affectedJumpNode = head_;
 
-	if (this->head_ == nullptr) {
-		this->head_ = newNode;
+	if (head_ == nullptr) {
+		head_ = newNode;
 		return true;
 	}
 
-	if (this->head_->data_ > s) { // insert before head
- 		Node* oldJump = this->head_->jump_;
-		int oldGap = this->head_->gap_;
+	if (head_->data_ > s) { // insert before head
+ 		Node* oldJump = head_->jump_;
+		int oldGap = head_->gap_;
 
-		this->head_->jump_ = nullptr;
-		this->head_->gap_ = 0;
+		head_->jump_ = nullptr;
+		head_->gap_ = 0;
 
-		newNode->next_ = this->head_;
+		newNode->next_ = head_;
 		newNode->jump_ = oldJump;
 		newNode->gap_ = oldGap;
 
-		this->head_ = newNode;
+		head_ = newNode;
 		affectedJumpNode = newNode;
 	} else { // insert after head
 		Node* tmp = head_;
 
-		while (tmp->jump_ != nullptr && tmp->jump_->data_ < s) {
+		//find position to put new node
+		while (tmp->jump_ != nullptr && tmp->jump_->data_ < s) { // fast lane
 			affectedJumpNode = tmp->jump_;
 			tmp = tmp->jump_;
 		}
 
-		while (tmp->next_ != nullptr && tmp->next_->data_ < s)
+		while (tmp->next_ != nullptr && tmp->next_->data_ < s) // slow lane
 			tmp = tmp->next_;
 
-		if (tmp->next_ != nullptr && tmp->next_->data_ == s) 
+		if (tmp->next_ != nullptr && tmp->next_->data_ == s) // similar node already exists
 			return false;
-
-		//tmp.next is new node, node.next is old tmp.next
 
 		Node* oldNext = tmp->next_;
 
@@ -264,33 +263,84 @@ bool JumpList::insert(const string& s) {
 		newNode->next_ = oldNext;
 	}
 
-	affectedJumpNode->gap_ += 1;
+	affectedJumpNode->gap_ += 1; // gap increased by 1
 
-	if (affectedJumpNode->gap_ > MAX_GAP_SIZE) {
-		int firstHalf = std::ceil(affectedJumpNode->gap_ / 2.0);
-		int secHalf = std::floor(affectedJumpNode->gap_ / 2.0);
-
-		Node* newJumpNode = affectedJumpNode;
-
-		for (int i = 0; i < firstHalf; i++)
-			newJumpNode = newJumpNode->next_;
-
-		Node* targetNode = newJumpNode;
-
-		for (int i = 0; i < secHalf; i++)
-			targetNode = targetNode->next_;
-
-		affectedJumpNode->jump_ = newJumpNode;
-		affectedJumpNode->gap_ = firstHalf;
-		newJumpNode->jump_ = targetNode;
-		newJumpNode->gap_ = secHalf;
+	if (affectedJumpNode->gap_ > MAX_GAP_SIZE) { // split segment in half
+		splitSegment(affectedJumpNode);
 	}
 
 	return true;
 }
 
 bool JumpList::erase(const string& s) {
-	// IMPLEMENT ME
+	Node* targetNode = head_;
+	Node* prevNode = head_;
+	Node* prevJumpNode = head_;
 
-	return false; // dummy
+	if (head_->data_ == s && head_->next_ == nullptr) { // only 1 node (head)
+		delete head_;
+		head_ = nullptr;
+		return true;
+	}
+
+	while (targetNode->jump_ != nullptr && targetNode->jump_->data_ <= s) { // fast lane
+		Node* runner = targetNode;
+		while (runner->next_->data_ < s) // use runner to find previous node as fast lane skips over it
+			runner = runner->next_;
+
+		prevJumpNode = targetNode;
+		prevNode = runner;
+		targetNode = targetNode->jump_;
+	}
+
+	while (targetNode->next_ != nullptr && targetNode->next_->data_ <= s) { // slow lane
+		prevNode = targetNode;
+		targetNode = targetNode->next_;
+	}
+
+	if (targetNode->data_ != s) // not in list
+		return false;
+	
+	std::cout << "delete: " << targetNode->data_ << " | prev node: " << prevNode->data_ << " | prev jnode: " << prevJumpNode->data_ << std::endl;
+
+	if (targetNode == head_) { // deleting head
+		head_ = targetNode->next_;
+		head_->jump_ = targetNode->jump_;
+		head_->gap_ = targetNode->gap_ - 1;
+
+		delete targetNode;
+		targetNode = nullptr;
+	} else if (targetNode->gap_ != 0) { // deleting jump node
+		Node* nextJumpNode = targetNode->jump_;
+
+		
+	} else { // deleting normal node
+		prevNode->next_ = targetNode->next_;
+		prevJumpNode->gap_ -= 1;
+
+		delete targetNode;
+		targetNode = nullptr;
+	}
+
+	return true;
+}
+
+void JumpList::splitSegment(Node* targetJumpNode) {
+	int firstHalf = std::ceil(targetJumpNode->gap_ / 2.0);
+	int secHalf = std::floor(targetJumpNode->gap_ / 2.0);
+
+	Node* newJumpNode = targetJumpNode;
+
+	for (int i = 0; i < firstHalf; i++) // find middle of segment, this is new jump node
+		newJumpNode = newJumpNode->next_;
+
+	Node* targetNode = newJumpNode;
+
+	for (int i = 0; i < secHalf; i++) // the node that our new jump node will jump to
+		targetNode = targetNode->next_;
+
+	targetJumpNode->jump_ = newJumpNode;
+	targetJumpNode->gap_ = firstHalf;
+	newJumpNode->jump_ = targetNode;
+	newJumpNode->gap_ = secHalf;
 }

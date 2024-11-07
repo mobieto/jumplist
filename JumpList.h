@@ -83,6 +83,7 @@ private:
 	Node* head_; // point to first node
 	             // you are allowed to add other members if you want
 
+	void splitSegment(Node* targetJumpNode);
 	// you are allowed to add other member functions if you want
 
 };

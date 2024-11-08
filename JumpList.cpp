@@ -63,13 +63,12 @@ JumpList::JumpList(int size, const string* arr) {
 
 	head_ = npp[0];
 	delete [] npp; // note that the local array npp gets destroyed here but the nodes stay alive!
-
 }
 
 JumpList::~JumpList() {
 	Node* current = head_;
 
-	while (current != nullptr) { // delete every node from memory
+	while (current != nullptr) { // remove every node from memory
 		Node* next = current->next_;
 		delete current;
 		current = next;
@@ -106,7 +105,6 @@ bool JumpList::find(const string& s) const {
 
 	// now slow lane
 	while(tmp != nullptr) {
-
 		if (tmp->data_ == s) return true; // match
 		else if (tmp->data_ > s) return false; // went past without finding s
 		else tmp = tmp->next_;
@@ -122,7 +120,7 @@ string JumpList::get(int i) const {
 	Node* current = head_;
 
 	while (step < i) {
-		if (current->jump_ != nullptr && step + current->gap_ - 1 < i) { // move through fast line
+		if (current->jump_ != nullptr && step + current->gap_ - 1 < i) { // move through fast lane
 			step += current->gap_;
 			current = current->jump_;
 		} else { // slow lane
@@ -157,7 +155,7 @@ int JumpList::index(const string& s) const {
 		i++;
 	}
 
-	return -1; // end of list
+	return -1; // end of list, not found
 }
 
 string JumpList::print() const {
@@ -270,7 +268,7 @@ bool JumpList::insert(const string& s) {
 
 	affectedJumpNode->gap_ += 1; // gap increased by 1
 
-	if (affectedJumpNode->gap_ > MAX_GAP_SIZE) // split segment in half
+	if (affectedJumpNode->gap_ > MAX_GAP_SIZE) // split segment in half if too big
 		splitSegment(affectedJumpNode);
 
 	return true;
@@ -291,6 +289,7 @@ bool JumpList::erase(const string& s) {
 		return true;
 	}
 
+	// find node to erase
 	while (targetNode->jump_ != nullptr && targetNode->jump_->data_ <= s) { // fast lane
 		Node* runner = targetNode;
 
@@ -327,20 +326,20 @@ bool JumpList::erase(const string& s) {
 		prevJumpNode->gap_ += targetNode->gap_ - 1; // -1 to take into account removed node
 		prevNode->next_ = targetNode->next_;
 
-		if (prevJumpNode->gap_ > MAX_GAP_SIZE) 
+		if (prevJumpNode->gap_ > MAX_GAP_SIZE) // split if merged segments too big
 			splitSegment(prevJumpNode);
 	} else { // deleting normal node
 		prevNode->next_ = targetNode->next_;
 		prevJumpNode->gap_ -= 1;		
 	}
 
-	delete targetNode;
+	delete targetNode; // finally remove erased node from memory
 	targetNode = nullptr;
 
 	return true;
 }
 
-void JumpList::splitSegment(Node* targetJumpNode) {
+void JumpList::splitSegment(Node* targetJumpNode) { // helper method to split a segment in half
 	int firstHalf = std::ceil(targetJumpNode->gap_ / 2.0);
 	int secHalf = std::floor(targetJumpNode->gap_ / 2.0);
 
@@ -351,7 +350,7 @@ void JumpList::splitSegment(Node* targetJumpNode) {
 
 	Node* targetNode = newJumpNode;
 
-	for (int i = 0; i < secHalf; i++) // the node that our new jump node will jump to
+	for (int i = 0; i < secHalf; i++) // find the node that our new jump node will jump to
 		targetNode = targetNode->next_;
 
 	targetJumpNode->jump_ = newJumpNode;

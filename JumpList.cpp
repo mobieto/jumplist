@@ -226,8 +226,13 @@ bool JumpList::insert(const string& s) {
 
 	if (head_ == nullptr) {
 		head_ = newNode;
+		head_->gap_ = 1;
+		
 		return true;
 	}
+
+	if (head_->data_ == s) // head node already exists
+		return false;
 
 	if (head_->data_ > s) { // insert before head
  		Node* oldJump = head_->jump_;
@@ -265,9 +270,8 @@ bool JumpList::insert(const string& s) {
 
 	affectedJumpNode->gap_ += 1; // gap increased by 1
 
-	if (affectedJumpNode->gap_ > MAX_GAP_SIZE) { // split segment in half
+	if (affectedJumpNode->gap_ > MAX_GAP_SIZE) // split segment in half
 		splitSegment(affectedJumpNode);
-	}
 
 	return true;
 }
@@ -277,14 +281,19 @@ bool JumpList::erase(const string& s) {
 	Node* prevNode = head_;
 	Node* prevJumpNode = head_;
 
-	if (head_->data_ == s && head_->next_ == nullptr) { // only 1 node (head)
+	if (head_ == nullptr) // empty list
+		return false;
+
+	if (head_->data_ == s && head_->next_ == nullptr) { // only head
 		delete head_;
 		head_ = nullptr;
+
 		return true;
 	}
 
 	while (targetNode->jump_ != nullptr && targetNode->jump_->data_ <= s) { // fast lane
 		Node* runner = targetNode;
+
 		while (runner->next_->data_ < s) // use runner to find previous node as fast lane skips over it
 			runner = runner->next_;
 
@@ -294,33 +303,39 @@ bool JumpList::erase(const string& s) {
 	}
 
 	while (targetNode->next_ != nullptr && targetNode->next_->data_ <= s) { // slow lane
+		if (targetNode->gap_ != 0)
+			prevJumpNode = targetNode;
+
 		prevNode = targetNode;
 		targetNode = targetNode->next_;
 	}
 
 	if (targetNode->data_ != s) // not in list
 		return false;
-	
-	std::cout << "delete: " << targetNode->data_ << " | prev node: " << prevNode->data_ << " | prev jnode: " << prevJumpNode->data_ << std::endl;
 
 	if (targetNode == head_) { // deleting head
 		head_ = targetNode->next_;
-		head_->jump_ = targetNode->jump_;
-		head_->gap_ = targetNode->gap_ - 1;
 
-		delete targetNode;
-		targetNode = nullptr;
-	} else if (targetNode->gap_ != 0) { // deleting jump node
+		if (head_->gap_ == 0) { // if next node was already a jump node, dont change anything
+			head_->jump_ = targetNode->jump_;
+			head_->gap_ = targetNode->gap_ - 1;
+		}
+	} else if (targetNode->gap_ != 0) { // deleting jump node, merge previous jump node with next jump node
 		Node* nextJumpNode = targetNode->jump_;
 
-		
+		prevJumpNode->jump_ = (nextJumpNode == nullptr) ? nullptr: nextJumpNode; // previous jump node will now jump to next jump node or nullptr if jumpnode was at end
+		prevJumpNode->gap_ += targetNode->gap_ - 1; // -1 to take into account removed node
+		prevNode->next_ = targetNode->next_;
+
+		if (prevJumpNode->gap_ > MAX_GAP_SIZE) 
+			splitSegment(prevJumpNode);
 	} else { // deleting normal node
 		prevNode->next_ = targetNode->next_;
-		prevJumpNode->gap_ -= 1;
-
-		delete targetNode;
-		targetNode = nullptr;
+		prevJumpNode->gap_ -= 1;		
 	}
+
+	delete targetNode;
+	targetNode = nullptr;
 
 	return true;
 }

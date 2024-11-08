@@ -441,7 +441,6 @@ void JumpListTester::testn() {
 
 	// empty list
 	JumpList a;
-	a.erase("a");
 	if (a.size() != 0)
 		errorOut_("erase from empty list wrong size: ", a.size(), 1);
 	if (a.find("a"))

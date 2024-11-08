@@ -29,29 +29,26 @@ int main() {
 
 	// cout << "------------------------" << endl;
 
-	cout << "insert to running example:" << endl;
-	JumpList example(10);
-	cout << example.prettyPrint() << endl;
-	example.insert("dog");
-	cout << example.prettyPrint() << endl;
-	example.insert("AAAA");
-	cout << example.prettyPrint() << endl;
-	example.insert("AAA");
-	cout << example.prettyPrint() << endl;
-	example.insert("AA");
-	cout << example.prettyPrint() << endl;
-	example.insert("doggy");
-	cout << example.prettyPrint() << endl;
-	example.insert("dogggies");
-	cout << example.prettyPrint() << endl;
+	// cout << "insert to running example:" << endl;
+	// JumpList example(10);
+	// cout << example.prettyPrint() << endl;
+	// example.insert("dog");
+	// cout << example.prettyPrint() << endl;
+	// example.insert("AAAA");
+	// cout << example.prettyPrint() << endl;
+	// example.insert("AAA");
+	// cout << example.prettyPrint() << endl;
+	// example.insert("AA");
+	// cout << example.prettyPrint() << endl;
+	// example.insert("doggy");
+	// cout << example.prettyPrint() << endl;
+	// example.insert("dogggies");
+	// cout << example.prettyPrint() << endl;
 
-	example.erase("a");
-	example.erase("b");
-	example.erase("blah");
-	example.erase("d");
-	example.erase("AA");
+	// example.erase("blah");
+	// example.erase("x");
 
-	cout << example.prettyPrint() << endl;
+	// cout << example.prettyPrint() << endl;
 
 	// string arr[] = {"a", "b"};
 	// JumpList example3(2, arr);
@@ -61,12 +58,12 @@ int main() {
 
 	// cout << example3.prettyPrint() << endl;
 
-	// cout << "erase from running example:" << endl;
-	// JumpList example(10);
-	// cout << example.print() << endl;
-	// example.erase("blah");
-	// cout << example.print() << endl;
-	// cout << example.prettyPrint() << endl;
+	cout << "erase from running example:" << endl;
+	JumpList example(10);
+	cout << example.prettyPrint() << endl;
+	cout << endl << endl;
+	example.erase("d");
+	cout << example.prettyPrint() << endl;
 
 	// cout << "------------------------" << endl;
 
